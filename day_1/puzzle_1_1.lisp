@@ -26,30 +26,6 @@
 ;; Test
 (parse-input-line "L99") ; => #S(TURN :DIRECTION LEFT :CLICKS 99)
 
-;; (defun turn-dial (turn &key (start 50)
-;; 			 (dial-length 99)
-;; 			 (debug '())
-;; 			 (on-zero #'(lambda (turn) (if debug (format T "Hit zero!~%")))))
-;;   "Execute a turn, returning the new location on the dial."
-;;   (format T "Turning dial ~S ~D clicks from ~D~%" (turn-direction turn) (turn-clicks turn) start)
-;;   (labels ((click-dial (n direction from)
-;; 	     "click the dial n times in a given direction from a start"
-;; 	     (if debug (format T "Clicking dial one click ~S from ~S~%" direction from))
-;; 	     (if (zerop from) (funcall on-zero turn))
-;; 	     (cond ((zerop n) from)
-;; 		   ((equalp direction 'LEFT)
-;; 		    (click-dial (- n 1)
-;; 				direction
-;; 				(if (equal from dial-length)
-;; 				    0
-;; 				    (+ 1 from))))
-;; 		   (T (click-dial (- n 1)
-;; 				  direction
-;; 				  (if (equal from 0)
-;; 				      dial-length
-;; 				      (- from 1)))))))
-;;     (click-dial (turn-clicks turn) (turn-direction turn) start)))
-
 (defun turn-dial (turn &key (start 50)
 			 (dial-length 99)
 			 (debug '())
