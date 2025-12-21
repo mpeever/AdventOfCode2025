@@ -19,9 +19,9 @@
 (defun parse-input-line (input-line)
   "Parse an input line consisting of a direction and a count."
   (cl-ppcre:register-groups-bind (direction clicks) ("^(\\D)(\\d+)$" input-line)
-	   (make-turn :direction (cond ((equalp direction "R") 'RIGHT)
-				       (T 'LEFT))
-		      :clicks (parse-integer clicks))))
+    (make-turn :direction (cond ((equalp direction "R") 'RIGHT)
+				(T 'LEFT))
+	       :clicks (parse-integer clicks))))
 
 ;; Test
 (parse-input-line "L99") ; => #S(TURN :DIRECTION LEFT :CLICKS 99)
@@ -32,18 +32,19 @@
 			 (on-pass-zero #'(lambda (turn) (if debug (format T "Passes zero!~%"))))
 			 (on-zero #'(lambda (turn) (if debug (format T "Lands on zero!~%"))))) 
   "Execute a turn, returning the new location on the dial."
-  (format T "Turning dial ~S ~D clicks from ~D~%" (turn-direction turn) (turn-clicks turn) start)
+  (when debug
+    (format T "Turning dial ~S ~D clicks from ~D~%" (turn-direction turn) (turn-clicks turn) start))
   (labels ((click-dial (n direction start-from)
-	     "click the dial one time in a given direction start-from a start"
+	     "click the dial one time in a given direction from start-from"
 	     (when debug
 	       (format T "Clicking dial one click ~S start-from ~S~%" direction start-from))
 	     (cond ((zerop n)
 		    ;; no more clicks left, just return our starrt
 		    start-from)
 		   (T (let ((end (cond ((equalp direction 'RIGHT)
-						    (if (equal start-from dial-length)
-							0
-							(+ 1 start-from)))
+					(if (equal start-from dial-length)
+					    0
+					    (+ 1 start-from)))
 				       (T (if (equal start-from 0)
 					      dial-length
 					      (- start-from 1))))))
@@ -55,7 +56,7 @@
 	(funcall on-zero turn))
       end)))
 
-  
+
 (defun puzzle-1-1 (input-lines &key (start 50) (dial-length 99))
   "Calculate the number of times a dial of 'length' points to 0, given a start of 'start' and input directions 'input-lines'."
   (let ((turns (mapcar #'parse-input-line input-lines))
@@ -76,4 +77,4 @@
 	    pass-zero-counter
 	    zero-counter)))
 
-;; (puzzle-1-1 (uiop:read-file-lines "/Users/mark/Projects/AdventOfCode2025/input-1-1.txt"))    
+;; (puzzle-1-1 (uiop:read-file-lines "/Users/mark/Projects/AdventOfCode2025/day_1/input-1-1.txt"))    
