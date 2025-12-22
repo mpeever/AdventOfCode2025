@@ -10,7 +10,7 @@
 
 ;; Require split-sequence
 #-SPLIT-SEQUENCE
-(ql:quicklisp 'split-sequence)
+(ql:quickload 'split-sequence)
 
 (defstruct turn
   (direction 'LEFT :type symbol)
