@@ -41,13 +41,15 @@
 	     (cond ((zerop n)
 		    ;; no more clicks left, just return our starrt
 		    start-from)
-		   (T (let ((end (cond ((equalp direction 'RIGHT)
-					(if (equal start-from dial-length)
-					    0
-					    (+ 1 start-from)))
-				       (T (if (equal start-from 0)
-					      dial-length
-					      (- start-from 1))))))
+		   (T (let ((end (cond ((and (equalp direction 'RIGHT)
+					     (equal start-from dial-length))
+					0)
+				       ((equalp direction 'RIGHT)
+					(+ 1 start-from))
+				       ((and (equalp direction 'LEFT)
+					     (equal start-from 0))
+					dial-length)
+				       (T (- start-from 1)))))
 			(when (zerop end)
 			  (funcall on-pass-zero turn))
 			(click-dial (- n 1) direction end))))))
