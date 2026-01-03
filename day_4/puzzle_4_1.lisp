@@ -131,11 +131,12 @@
 				  'WEST
 				  'NORTHWEST))
 
-(defun adjacent-points (grid point)
+(defun adjacent-points (grid point &key (debug '()))
   "Return the adjacent points to a given position on a grid."
   (loop for direction in all-directions
 	for p1 = (grid-step grid point direction)
-	;;do (format T "Point: ~S;~TDirection: ~D~T; P1: ~S~%" point direction p1)
+	when debug
+	  do (format T "Point: ~S;~TDirection: ~D~T; P1: ~S~%" point direction p1)
 	when (not (null p1))
 	  collecting p1))
 
@@ -178,8 +179,35 @@
 	do (set-grid-value grid point "x")
 	   finally (return grid)))
 
+(defun remove-rolls (grid)
+  "Remove all the removable rolls."
+  (let ((updated-grid (mark-adjacent-rolls (copy-grid grid))))
+    (loop for y from 0 to (- (grid-height updated-grid) 1)
+	  with count = 0
+	  do (loop for x from 0 to (- (grid-width updated-grid) 1)
+		   for point = (make-point :x x :y y)
+		   when (string= (get-grid-value updated-grid point) "x")
+		     do (progn
+			  (incf count)
+			  (set-grid-value updated-grid point ".")))
+	     finally (return (values updated-grid count)))))
+
+
 (defun puzzle-4-1 (input)
   (length (all-adjacent-rolls (create-grid input))))
+
+(defun puzzle-4-2 (input &key (debug '()))
+  (let* ((grid (create-grid input))
+	 (removals (loop for (updated-grid count) = (multiple-value-list (remove-rolls grid))
+			 when debug do (format T "~S~%" grid)
+			   until (zerop count)
+			 collecting count)))
+    (values
+     removals
+     (reduce #'+ removals))))
+  
+
+
 
 
 (defun flatten (tree)
