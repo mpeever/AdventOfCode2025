@@ -206,10 +206,6 @@
      removals
      (reduce #'+ removals))))
   
-
-
-
-
 (defun flatten (tree)
   "Save some keystrokes."
   (alexandria:flatten tree))
