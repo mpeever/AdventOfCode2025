@@ -65,6 +65,10 @@
 (defmethod in-range? ((range range) (id string))
   (in-range? range (parse-integer id)))
 
+(defun range-size (range)
+  (+ 1 (- (range-max range)
+	  (range-min range))))
+
 
 (defun puzzle-5-1 (text-lines &key (debug '()))
   (labels ((db (lines acc)
@@ -85,5 +89,66 @@
 		  fresh))))))
 
 
+(defun intersect-p (range1 range2)
+  "Check whether two ranges intersect"
+  (or (in-range? range1 (range-min range2))
+      (in-range? range1 (range-max range2))
+      (in-range? range2 (range-min range1))
+      (in-range? range2 (range-max range1))))
 
-			
+(defun combine-ranges (range1 range2 &key (debug T))
+  (when (intersect-p range1 range2)
+    (when debug
+      (format T "Combining ~S and ~S~%" range1 range2))
+    (make-range :min (min (range-min range1)
+			  (range-min range2))
+		:max (max (range-max range1)
+			  (range-max range2)))))
+
+(defun all-disjunct-p (ranges)
+  (if (null ranges)
+      T
+      (let* ((head (car ranges))
+	     (tail (cdr ranges))
+	     (intersections (remove-if-not #'(lambda (r)
+					       (intersect-p head r))
+					   tail)))
+	(cond ((null intersections) (all-disjunct tail))
+	      (T '())))))
+
+(defun combine-all-ranges (ranges &key (debug T))
+  "Combine all the ranges in RANGES that are possible to combine."
+  (labels ((cmbn (list acc)
+	     (cond ((null list) acc)
+		   (T (let ((disjunctions (remove-if #'(lambda (r)
+							 (intersect-p (car list) r))
+						     (cdr list)))
+			    (intersections (remove-if-not #'(lambda (r)
+							      (intersect-p (car list) r))
+							  (cdr list))))
+			(when debug
+			  (format T "range: ~S; ~S disjunctions, ~S intersections~%"
+				  (car list)
+				  (length disjunctions)
+				  (length intersections)))
+			(cmbn disjunctions
+			      (cons (reduce #'combine-ranges
+					    intersections
+					    :initial-value (car list))
+				    acc)))))))
+    ;; I HATE HATE HATE that I have to do this, but it seems necessary
+    ;; clearly there's a bug in cmbn I haven't found yet
+    (loop for input = (cmbn ranges '()) then (cmbn input '())
+	  until (all-disjunct-p input)
+	  finally (return input))))
+	
+(defun puzzle-5-2 (text-lines &key (debug T))
+  (labels ((db (lines acc)
+	     (cond ((string= "" (car lines)) acc)
+		   (T (db (cdr lines) (cons (text-to-range (car lines)) acc))))))
+    (let ((ranges (combine-all-ranges (db text-lines '()))))
+      (when debug
+	(format T "ranges: ~S; all disjunct? ~S~%" ranges (all-disjunct ranges)))
+      (reduce #'+
+	      (mapcar #'range-size
+		     ranges)))))
