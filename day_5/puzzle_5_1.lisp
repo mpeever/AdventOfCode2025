@@ -120,22 +120,24 @@
   "Combine all the ranges in RANGES that are possible to combine."
   (labels ((cmbn (list acc)
 	     (cond ((null list) acc)
-		   (T (let ((disjunctions (remove-if #'(lambda (r)
-							 (intersect-p (car list) r))
-						     (cdr list)))
-			    (intersections (remove-if-not #'(lambda (r)
-							      (intersect-p (car list) r))
-							  (cdr list))))
+		   (T (let* ((head (car list))
+			     (tail (cdr list))
+			     (disjunctions (remove-if #'(lambda (r)
+							  (intersect-p head r))
+						      tail))
+			     (intersections (remove-if-not #'(lambda (r)
+							       (intersect-p head r))
+							   tail))
+			     (reduction (reduce #'combine-ranges
+						intersections
+						:initial-value head)))
 			(when debug
 			  (format T "range: ~S; ~S disjunctions, ~S intersections~%"
-				  (car list)
+				  head
 				  (length disjunctions)
 				  (length intersections)))
 			(cmbn disjunctions
-			      (cons (reduce #'combine-ranges
-					    intersections
-					    :initial-value (car list))
-				    acc)))))))
+			      (cons reduction acc)))))))
     ;; I HATE HATE HATE that I have to do this, but it seems necessary
     ;; clearly there's a bug in cmbn I haven't found yet
     (loop for input = (cmbn ranges '()) then (cmbn input '())
