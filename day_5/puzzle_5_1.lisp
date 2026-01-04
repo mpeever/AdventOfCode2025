@@ -96,7 +96,7 @@
       (in-range? range2 (range-min range1))
       (in-range? range2 (range-max range1))))
 
-(defun combine-ranges (range1 range2 &key (debug T))
+(defun combine-ranges (range1 range2 &key (debug '()))
   (when (intersect-p range1 range2)
     (when debug
       (format T "Combining ~S and ~S~%" range1 range2))
@@ -116,7 +116,7 @@
 	(cond ((null intersections) (all-disjunct tail))
 	      (T '())))))
 
-(defun combine-all-ranges (ranges &key (debug T))
+(defun combine-all-ranges (ranges &key (debug '()))
   "Combine all the ranges in RANGES that are possible to combine."
   (labels ((cmbn (list acc)
 	     (cond ((null list) acc)
@@ -144,7 +144,7 @@
 	  until (all-disjunct-p input)
 	  finally (return input))))
 	
-(defun puzzle-5-2 (text-lines &key (debug T))
+(defun puzzle-5-2 (text-lines &key (debug '()))
   (labels ((db (lines acc)
 	     (cond ((string= "" (car lines)) acc)
 		   (T (db (cdr lines) (cons (text-to-range (car lines)) acc))))))
